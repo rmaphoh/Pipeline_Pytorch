@@ -53,31 +53,24 @@ parser.add_argument(
 args = parser.parse_args()
 
 CONFIG = configuration.Configuration(args.configuration)
-binary_FD_binary,binary_VD_binary,binary_Average_width,binary_t2_list,binary_t4_list,binary_t5_list = [],[],[],[],[],[]
-artery_FD_binary,artery_VD_binary,artery_Average_width,artery_t2_list,artery_t4_list,artery_t5_list = [],[],[],[],[],[]
-vein_FD_binary,vein_VD_binary,vein_Average_width,vein_t2_list,vein_t4_list,vein_t5_list = [],[],[],[],[],[]
+binary_FD_binary,binary_VD_binary,binary_Average_width= [],[],[]
 name_list = []
 
 Binary_PATH = '../../Results/M2/binary_skeleton/'
 
 for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
     segmentedImage = retina.Retina(None, filename, store_path='../../Results/M2/binary_vessel/')
-    #segmentedImage.threshold_image()
-    #segmentedImage.reshape_square()
-    #window_sizes = segmentedImage.get_window_sizes()
+
     window_sizes = [912]
     window = retina.Window(
         segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
     FD_binary,VD_binary,Average_width, t2, t4, td = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path='../../Results/M2/binary_vessel/')
-    #print(window.tags)
-    binary_t2_list.append(t2)
-    binary_t4_list.append(t4)
-    binary_t5_list.append(td)
+
     binary_FD_binary.append(FD_binary)
     binary_VD_binary.append(VD_binary)
     binary_Average_width.append(Average_width)
     name_list.append(filename.split('/')[-1])
 
 
-Data4stage2 = pd.DataFrame({'Fractal_dimension':binary_FD_binary, 'Vessel_density':binary_VD_binary, 'Average_width':binary_Average_width,'Distance_tortuosity':binary_t2_list, 'Squared_curvature_tortuosity':binary_t4_list, 'Tortuosity_density':binary_t5_list})
+Data4stage2 = pd.DataFrame({'Fractal_dimension':binary_FD_binary, 'Vessel_density':binary_VD_binary, 'Average_width':binary_Average_width})
 Data4stage2.to_csv('../../Results/M3/Macular_centred/Macular_Measurement.csv', index = None, encoding='utf8')
