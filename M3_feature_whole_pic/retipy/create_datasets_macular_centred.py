@@ -40,8 +40,8 @@ if os.path.exists('../../Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpo
     shutil.rmtree('../../Results/M2/binary_vessel/binary_skeleton/.ipynb_checkpoints') 
 if os.path.exists('../../Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints'):
     shutil.rmtree('../../Results/M2/artery_vein/vein_binary_skeleton/.ipynb_checkpoints')
-if not os.path.exists('../../Results/M3/Macular_centred'):
-    os.makedirs('../../Results/M3/Macular_centred')
+if not os.path.exists('../../Results/M3/'):
+    os.makedirs('../../Results/M3/')
 
 parser = argparse.ArgumentParser()
 
@@ -59,18 +59,23 @@ name_list = []
 Binary_PATH = '../../Results/M2/binary_skeleton/'
 
 for filename in sorted(glob.glob(os.path.join(Binary_PATH, '*.png'))):
-    segmentedImage = retina.Retina(None, filename, store_path='../../Results/M2/binary_vessel/')
 
-    window_sizes = [912]
-    window = retina.Window(
-        segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
-    FD_binary,VD_binary,Average_width, t2, t4, td = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path='../../Results/M2/binary_vessel/')
+    try:
+        segmentedImage = retina.Retina(None, filename, store_path='../../Results/M2/binary_vessel/')
 
-    binary_FD_binary.append(FD_binary)
-    binary_VD_binary.append(VD_binary)
-    binary_Average_width.append(Average_width)
-    name_list.append(filename.split('/')[-1])
+        window_sizes = [912]
+        window = retina.Window(
+            segmentedImage, window_sizes[-1], min_pixels=CONFIG.pixels_per_window)
+        FD_binary,VD_binary,Average_width, t2, t4, td = tortuosity_measures.evaluate_window(window, CONFIG.pixels_per_window, CONFIG.sampling_size, CONFIG.r_2_threshold,store_path='../../Results/M2/binary_vessel/')
+
+        binary_FD_binary.append(FD_binary)
+        binary_VD_binary.append(VD_binary)
+        binary_Average_width.append(Average_width)
+        name_list.append('./test_data/' + filename.split('/')[-1])
+    
+    except:
+        pass
 
 
-Data4stage2 = pd.DataFrame({'Fractal_dimension':binary_FD_binary, 'Vessel_density':binary_VD_binary, 'Average_width':binary_Average_width})
-Data4stage2.to_csv('../../Results/M3/Macular_centred/Macular_Measurement.csv', index = None, encoding='utf8')
+Data4stage2 = pd.DataFrame({'image':name_list, 'Fractal_dimension':binary_FD_binary, 'Vessel_density':binary_VD_binary, 'Average_width':binary_Average_width})
+Data4stage2.to_csv('../../Results/M3/Macular_Measurement.csv', index = None, encoding='utf8')
